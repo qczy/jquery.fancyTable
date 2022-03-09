@@ -4,6 +4,7 @@
  *
  * Copyright 2018 Johan Johansson
  * Released under the MIT license
+ * q3 mod - v 1.0
  */
 (function($) {
 	$.fn.fancyTable = function(options) {
@@ -11,9 +12,14 @@
 			inputStyle: "",
 			inputPlaceholder: "Search...",
 			pagination: false,
+			paginationElement: "",
 			paginationClass: "btn btn-light",
 			paginationClassActive: "active",
-			pagClosest: 3,
+			pagClosest: 3, /* 1...123X321...n */
+			spacerClass: "",
+			showArrows: true,
+			prevArrow: "",
+			nextArrow: "",
 			perPage: 10,
 			sortable: true,
 			searchable: true,
@@ -61,27 +67,60 @@
 			});
 			elm.fancyTable.pages = Math.ceil(elm.fancyTable.matches/elm.fancyTable.perPage);
 			if(settings.pagination){
-				var paginationElement = (elm.fancyTable.paginationElement) ? $(elm.fancyTable.paginationElement) : $(elm).find(".pag");
+				var paginationElement = (settings.paginationElement) ? $(elm).next(".pag") : $(elm).find(".pag");
 				paginationElement.empty();
+				
+				if(settings.showArrows){
+					var a = $("<a>",{
+							html:settings.prevArrow?settings.prevArrow:'&#10094',
+							class:settings.paginationClass+" "+((1==elm.fancyTable.page)?"w3-disabled":"")
+						});
+					if(1!=elm.fancyTable.page)
+						a.bind("click",function(){
+							elm.fancyTable.page--;
+							instance.tableUpdate(elm);
+						});
+					paginationElement.append(a);
+				}
+				
 				for(var n=1; n<=elm.fancyTable.pages; n++){
 					if(n==1 || (n>(elm.fancyTable.page-(settings.pagClosest+1)) && n<(elm.fancyTable.page+(settings.pagClosest+1))) || n==elm.fancyTable.pages){
 						var a = $("<a>",{
+							href: "#"+n,
 							html:n,
 							"data-n": n,
-							style:"margin:0.2em",
 							class:settings.paginationClass+" "+((n==elm.fancyTable.page)?settings.paginationClassActive:"")
-						}).css("cursor","pointer").bind("click",function(){
+						}).bind("click",function(e){
+							e.preventDefault();
 							elm.fancyTable.page = $(this).data("n");
 							instance.tableUpdate(elm);
 						});
 						if(n==elm.fancyTable.pages && elm.fancyTable.page<(elm.fancyTable.pages-settings.pagClosest-1)){
-							paginationElement.append($("<span>...</span>"));
+							paginationElement.append($("<span>",{
+								html:"...",
+								class:settings.spacerClass
+							}));
 						}
 						paginationElement.append(a);
 						if(n==1 && elm.fancyTable.page>settings.pagClosest+2){
-							paginationElement.append($("<span>...</span>"));
+							paginationElement.append($("<span>",{
+								html:"...",
+								class:settings.spacerClass
+							}));
 						}
 					}
+				}
+				if(settings.showArrows){
+					var a = $("<a>",{
+							html:settings.nextArrow?settings.nextArrow:'&#10095',
+							class:settings.paginationClass+" "+((elm.fancyTable.pages==elm.fancyTable.page)?"w3-disabled":"")
+						});
+					if(elm.fancyTable.pages!=elm.fancyTable.page)
+						a.bind("click",function(){
+							elm.fancyTable.page++;
+							instance.tableUpdate(elm);
+						});
+					paginationElement.append(a);
 				}
 			}
 			settings.onUpdate.call(this,elm);
@@ -92,15 +131,15 @@
 				// Exact match due to "quoted" value
 				search = search.substring(1,search.length-1);
 				return (data==search);
-			} else if(settings.exactMatch == "auto" && search.replace(/\s+/g,"").match(/^[<>]=?/)){
+			} else if(settings.exactMatch == "auto" && search.replace(/\s+/g,"").match(/^[<>]/)){
 				// Less < or greater > than
-				var comp = search.replace(/\s+/g,"").match(/^[<>]=?/)[0];
-				var val = search.replace(/\s+/g,"").substring(comp.length);
-				return ((comp == '>' && data*1 > val*1) || (comp == '<' && data*1 < val*1) || (comp == '>=' && data*1 >= val*1) || (comp == '<=' && data*1 <= val*1))
+				var comp = search.replace(/\s+/g,"").substring(0,1);
+				var val = search.replace(/\s+/g,"").substring(1);
+				return ((comp == '>' && data*1 > val*1) || (comp == '<' && data*1 < val*1))
 			} else if(settings.exactMatch == "auto" && search.replace(/\s+/g,"").match(/^.+(\.\.|-).+$/)){
 				// Intervall 10..20 or 10-20
 				var arr = search.replace(/\s+/g,"").split(/\.\.|-/);
-				return (data*1 >= arr[0]*1 && data*1 <= arr[1]*1);
+				return (data*1 > arr[0]*1 && data*1 < arr[1]*1);
 			}
 			return (settings.exactMatch === true) ? (data==search) : (new RegExp(search).test(data));
 		};
@@ -128,10 +167,14 @@
 				var sortArrow = $("<div>",{"class":"sortArrow"}).css({"margin":"0.1em","display":"inline-block","width":0,"height":0,"border-left":"0.4em solid transparent","border-right":"0.4em solid transparent"});
 				sortArrow.css(
 					(elm.fancyTable.sortOrder>0) ?
-					{"border-top":"0.4em solid #000"} :
-					{"border-bottom":"0.4em solid #000"}
+					{"border-top":"0.4em solid #ffff"} :
+					{"border-bottom":"0.4em solid #ffff"}
 				);
 				$(elm).find("thead th a").eq(elm.fancyTable.sortColumn).append(sortArrow);
+				
+				elm.fancyTable.page = 1;
+				instance.tableUpdate(elm);
+				
 				var rows = $(elm).find("tbody tr").toArray().sort(
 					function(a, b) {
 						var elma = $(a).find("td").eq(elm.fancyTable.sortColumn);
@@ -251,10 +294,15 @@
 			}
 			// Sort
 			instance.tableSort(elm);
-			if(settings.pagination && !settings.paginationElement){
-				$(elm).find("tfoot").remove();
-				$(elm).append($("<tfoot><tr></tr></tfoot>"));
-				$(elm).find("tfoot tr").append($("<td class='pag'></td>",{ }).attr("colspan",elm.fancyTable.nColumns));
+			if(settings.pagination){
+				if(!settings.paginationElement){
+					$(elm).find("tfoot").remove();
+					$(elm).append($("<tfoot><tr></tr></tfoot>"));
+					$(elm).find("tfoot tr").append($("<td class='pag'></td>",{ }).attr("colspan",elm.fancyTable.nColumns));
+				}else
+				{
+					$(elm).after($(settings.paginationElement).addClass("pag"));	
+				}
 			}
 			instance.tableUpdate(elm);
 			settings.onInit.call(this,elm);
