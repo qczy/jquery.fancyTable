@@ -4,7 +4,7 @@
  *
  * Copyright 2018 Johan Johansson
  * Released under the MIT license
- * v 1.0
+ * q3 v 1.1
  */
 (function($) {
 	$.fn.fancyTable = function(options) {
@@ -16,11 +16,11 @@
 			paginationClass: "btn btn-light",
 			paginationClassActive: "active",
 			pagClosest: 3, /* 1...123X321...n */
-			spacer: "",
+			spacer: "...",
 			spacerClass: "",
-			showArrows: true,
-			prevArrow: "",
-			nextArrow: "",
+			showArrows: false,
+			prevArrow: "&#10094",
+			nextArrow: "&#10095",
 			perPage: 10,
 			sortable: true,
 			searchable: true,
@@ -73,7 +73,7 @@
 				
 				if(settings.showArrows){
 					var a = $("<a>",{
-							html:settings.prevArrow?settings.prevArrow:'&#10094',
+							html:settings.prevArrow,
 							class:settings.paginationClass+" "+((1==elm.fancyTable.page)?"w3-disabled":"")
 						});
 					if(1!=elm.fancyTable.page)
@@ -98,14 +98,14 @@
 						});
 						if(n==elm.fancyTable.pages && elm.fancyTable.page<(elm.fancyTable.pages-settings.pagClosest-1)){
 							paginationElement.append($("<span>",{
-								html:settings.spacer?settings.spacer:"...",
+								html:settings.spacer,
 								class:settings.spacerClass
 							}));
 						}
 						paginationElement.append(a);
 						if(n==1 && elm.fancyTable.page>settings.pagClosest+2){
 							paginationElement.append($("<span>",{
-								html:settings.spacer?settings.spacer:"...",
+								html:settings.spacer,
 								class:settings.spacerClass
 							}));
 						}
@@ -113,7 +113,7 @@
 				}
 				if(settings.showArrows){
 					var a = $("<a>",{
-							html:settings.nextArrow?settings.nextArrow:'&#10095',
+							html:settings.nextArrow,
 							class:settings.paginationClass+" "+((elm.fancyTable.pages==elm.fancyTable.page)?"w3-disabled":"")
 						});
 					if(elm.fancyTable.pages!=elm.fancyTable.page)
