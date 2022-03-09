@@ -4,7 +4,7 @@
  *
  * Copyright 2018 Johan Johansson
  * Released under the MIT license
- * q3 mod - v 1.0
+ * v 1.0
  */
 (function($) {
 	$.fn.fancyTable = function(options) {
@@ -16,6 +16,7 @@
 			paginationClass: "btn btn-light",
 			paginationClassActive: "active",
 			pagClosest: 3, /* 1...123X321...n */
+			spacer: "",
 			spacerClass: "",
 			showArrows: true,
 			prevArrow: "",
@@ -97,14 +98,14 @@
 						});
 						if(n==elm.fancyTable.pages && elm.fancyTable.page<(elm.fancyTable.pages-settings.pagClosest-1)){
 							paginationElement.append($("<span>",{
-								html:"...",
+								html:settings.spacer?settings.spacer:"...",
 								class:settings.spacerClass
 							}));
 						}
 						paginationElement.append(a);
 						if(n==1 && elm.fancyTable.page>settings.pagClosest+2){
 							paginationElement.append($("<span>",{
-								html:"...",
+								html:settings.spacer?settings.spacer:"...",
 								class:settings.spacerClass
 							}));
 						}
@@ -208,8 +209,7 @@
 				search : "",
 				sortColumn : settings.sortColumn,
 				sortOrder : (typeof settings.sortOrder === "undefined") ? 1 : (new RegExp("desc","i").test(settings.sortOrder) || settings.sortOrder == -1) ? -1 : 1,
-				sortAs:[], // null, numeric or case-insensitive
-				paginationElement : settings.paginationElement
+				sortAs:[] // null, numeric or case-insensitive
 			};
 			if($(elm).find("tbody").length==0){
 				var content = $(elm).html();
@@ -309,4 +309,4 @@
 		});
 		return this;
 	};
-}(jQuery));
+}(jQuery));	
