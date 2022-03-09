@@ -122,6 +122,37 @@ Or manually by including the script *after* the jQuery library
 
 *Default: 10*
 
+**spacer** - Custom defined spacer content
+
+    spacer: "..."
+
+*Default: ...*
+
+
+**spacerClass** - Custom defined spacer class
+
+    spacerClass: "spaceClass"
+
+*Default: *
+
+**showArrows** - Add arrows before and after pagess
+
+    showArrows: true
+
+*Default: false*
+
+**prevArrow** - Custom defined previous arrow content
+
+    prevArrow: "Prev"
+
+*Default: &#10094*
+
+**nextArrow** - Custom defined next arrow content
+
+    nextArrow: "Prev"
+
+*Default: &#10095*
+
 **searchable** - Should the table be searchable or not
 
     searchable: false
